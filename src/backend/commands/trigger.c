@@ -79,7 +79,7 @@ CreateTrigger(CreateTrigStmt *stmt, Oid constraintOid)
 	int16		tgtype;
 	int2vector *tgattr;
 	Datum		values[Natts_pg_trigger];
-	bool		nulls[Natts_pg_trigger];
+	char		nulls[Natts_pg_trigger];
 	Relation	rel;
 	AclResult	aclresult;
 	Relation	tgrel;
@@ -325,7 +325,7 @@ CreateTrigger(CreateTrigStmt *stmt, Oid constraintOid)
 	/*
 	 * Build the new pg_trigger tuple.
 	 */
-	memset(nulls, false, Natts_pg_trigger * sizeof(bool));
+	memset(nulls, ' ', Natts_pg_trigger * sizeof(char));
 
 	values[Anum_pg_trigger_tgrelid - 1] = ObjectIdGetDatum(RelationGetRelid(rel));
 	values[Anum_pg_trigger_tgname - 1] = DirectFunctionCall1(namein,
@@ -401,7 +401,7 @@ CreateTrigger(CreateTrigStmt *stmt, Oid constraintOid)
 	tgattr = buildint2vector(NULL, 0);
 	values[Anum_pg_trigger_tgattr - 1] = PointerGetDatum(tgattr);
 
-	tuple = heap_form_tuple(tgrel->rd_att, values, nulls);
+	tuple = heap_formtuple(tgrel->rd_att, values, nulls);
 
 	/* force tuple to have the desired OID */
 	HeapTupleSetOid(tuple, trigoid);
@@ -644,7 +644,7 @@ ConvertTriggerToFK(CreateTrigStmt *stmt, Oid funcoid)
 		ereport(NOTICE,
 		(errmsg("ignoring incomplete trigger group for constraint \"%s\" %s",
 				constr_name, buf.data),
-		 errdetail("%s", funcdescr[funcnum])));
+		 errdetail(funcdescr[funcnum])));
 		oldContext = MemoryContextSwitchTo(TopMemoryContext);
 		info = (OldTriggerInfo *) palloc0(sizeof(OldTriggerInfo));
 		info->args = copyObject(stmt->args);
@@ -660,7 +660,7 @@ ConvertTriggerToFK(CreateTrigStmt *stmt, Oid funcoid)
 		ereport(NOTICE,
 		(errmsg("ignoring incomplete trigger group for constraint \"%s\" %s",
 				constr_name, buf.data),
-		 errdetail("%s", funcdescr[funcnum])));
+		 errdetail(funcdescr[funcnum])));
 	}
 	else
 	{
@@ -672,7 +672,7 @@ ConvertTriggerToFK(CreateTrigStmt *stmt, Oid funcoid)
 		ereport(NOTICE,
 				(errmsg("converting trigger group into constraint \"%s\" %s",
 						constr_name, buf.data),
-				 errdetail("%s", funcdescr[funcnum])));
+				 errdetail(funcdescr[funcnum])));
 		if (funcnum == 2)
 		{
 			/* This trigger is on the FK table */
@@ -2139,7 +2139,7 @@ ExecBRUpdateTriggers(EState *estate, ResultRelInfo *relinfo,
 
 		if (newslot->tts_tupleDescriptor != tupdesc)
 			ExecSetSlotDescriptor(newslot, tupdesc);
-		ExecStoreHeapTuple(newtuple, newslot, InvalidBuffer, false);
+		ExecStoreTuple(newtuple, newslot, InvalidBuffer, false);
 		slot = newslot;
 	}
 	return slot;
