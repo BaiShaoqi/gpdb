@@ -6542,8 +6542,11 @@ StartupXLOG(void)
 		 * it means the standby crashed post promotion but before recovery.conf
 		 * cleanup. Hence, it is not considered a standby request this time.
 		 */
-		if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
-			StandbyModeRequested = false;
+		//if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
+			//StandbyModeRequested = false;
+		ereport(WARNING,
+				(errmsg("ControlFile->state: %d",
+						ControlFile->state)));
 	}
 
 	/*
@@ -6934,7 +6937,10 @@ StartupXLOG(void)
 								ControlFile->checkPointCopy.ThisTimeLineID,
 								recoveryTargetTLI)));
 
-			if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+			ereport(WARNING,
+					(errmsg("ControlFile->state: %d",
+							ControlFile->state)));
+			//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 				ControlFile->state = DB_IN_CRASH_RECOVERY;
 		}
 
@@ -7493,8 +7499,9 @@ StartupXLOG(void)
 
 		elog(LOG, "updating pg_control to state DB_IN_STANDBY_PROMOTED");
 
+		ereport(WARNING, (errmsg("ControlFile->state: %d", ControlFile->state)));
 		/* Transition to promoted mode */
-		ControlFile->state = DB_IN_STANDBY_PROMOTED;
+		ControlFile->state = DB_IN_ARCHIVE_RECOVERY;
 		ControlFile->time = (pg_time_t) time(NULL);
 		UpdateControlFile();
 	}
@@ -7614,7 +7621,7 @@ StartupXLOG(void)
 		writeTimeLineHistory(ThisTimeLineID, recoveryTargetTLI,
 							 EndRecPtr, reason);
 	}
-	else if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
+	else if (ControlFile->state == DB_IN_STANDBY_PROMOTED && false)
 	{
 		/*
 		 * If standby is promoted, we should advance timeline ID.
@@ -7627,7 +7634,7 @@ StartupXLOG(void)
 
 		XLogFileCopy(endLogSegNo, xlogreader->readPageTLI, endLogSegNo);
 	}
-
+    ereport(WARNING, (errmsg("ControlFile->state: %d", ControlFile->state)));
 	/* Save the selected TimeLineID in shared memory, too */
 	XLogCtl->ThisTimeLineID = ThisTimeLineID;
 	XLogCtl->PrevTimeLineID = PrevTimeLineID;
@@ -7832,8 +7839,9 @@ StartupXLOG(void)
 	 * apply to a mirror (standby of a GPDB segment) because it is
 	 * managed by FTS.
 	 */
+	ereport(WARNING, (errmsg("ControlFile->state: %d", ControlFile->state)));
 	bool needToPromoteCatalog = (IS_QUERY_DISPATCHER() &&
-								 ControlFile->state == DB_IN_STANDBY_PROMOTED);
+								 ControlFile->state == DB_IN_STANDBY_PROMOTED && false);
 
 	LWLockAcquire(ControlFileLock, LW_EXCLUSIVE);
 	ControlFile->state = DB_IN_PRODUCTION;
@@ -8732,7 +8740,8 @@ CreateCheckPoint(int flags)
 		 *
 		 * Refer to Startup_InProduction() for more details
 		 */
-		if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+		ereport(WARNING, (errmsg("ControlFile->state: %d", ControlFile->state)));
+		//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 		{
 			LWLockAcquire(ControlFileLock, LW_EXCLUSIVE);
 			ControlFile->state = DB_SHUTDOWNING;
@@ -9086,7 +9095,10 @@ CreateCheckPoint(int flags)
 		 * Ugly fix to dis-allow changing pg_control state
 		 * for standby promotion continuity
 		 */
-		if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+		ereport(WARNING,
+				(errmsg("ControlFile->state: %d",
+						ControlFile->state)));
+		//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 			ControlFile->state = DB_SHUTDOWNED;
 	}
 
