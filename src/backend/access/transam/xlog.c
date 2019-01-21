@@ -6542,8 +6542,8 @@ StartupXLOG(void)
 		 * it means the standby crashed post promotion but before recovery.conf
 		 * cleanup. Hence, it is not considered a standby request this time.
 		 */
-		if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
-			StandbyModeRequested = false;
+		//if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
+			//StandbyModeRequested = false;
 	}
 
 	/*
@@ -6934,7 +6934,7 @@ StartupXLOG(void)
 								ControlFile->checkPointCopy.ThisTimeLineID,
 								recoveryTargetTLI)));
 
-			if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+			//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 				ControlFile->state = DB_IN_CRASH_RECOVERY;
 		}
 
@@ -7486,7 +7486,7 @@ StartupXLOG(void)
 	/*
 	 * We are now done reading the xlog from stream.
 	 */
-	if (StandbyMode)
+	if (StandbyMode && false)
 	{
 		Assert(ControlFile->state == DB_IN_STANDBY_MODE);
 		StandbyMode = false;
@@ -7614,7 +7614,7 @@ StartupXLOG(void)
 		writeTimeLineHistory(ThisTimeLineID, recoveryTargetTLI,
 							 EndRecPtr, reason);
 	}
-	else if (ControlFile->state == DB_IN_STANDBY_PROMOTED)
+	else if (ControlFile->state == DB_IN_STANDBY_PROMOTED && false)
 	{
 		/*
 		 * If standby is promoted, we should advance timeline ID.
@@ -7833,7 +7833,7 @@ StartupXLOG(void)
 	 * managed by FTS.
 	 */
 	bool needToPromoteCatalog = (IS_QUERY_DISPATCHER() &&
-								 ControlFile->state == DB_IN_STANDBY_PROMOTED);
+								 ControlFile->state == DB_IN_STANDBY_MODE);
 
 	LWLockAcquire(ControlFileLock, LW_EXCLUSIVE);
 	ControlFile->state = DB_IN_PRODUCTION;
@@ -8732,7 +8732,7 @@ CreateCheckPoint(int flags)
 		 *
 		 * Refer to Startup_InProduction() for more details
 		 */
-		if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+		//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 		{
 			LWLockAcquire(ControlFileLock, LW_EXCLUSIVE);
 			ControlFile->state = DB_SHUTDOWNING;
@@ -9086,7 +9086,7 @@ CreateCheckPoint(int flags)
 		 * Ugly fix to dis-allow changing pg_control state
 		 * for standby promotion continuity
 		 */
-		if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
+		//if (ControlFile->state != DB_IN_STANDBY_PROMOTED)
 			ControlFile->state = DB_SHUTDOWNED;
 	}
 
