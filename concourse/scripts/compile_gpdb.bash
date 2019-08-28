@@ -79,9 +79,9 @@ function build_gpdb() {
     # make it much faster, and -j4 is small enough to not hurt too badly even on
     # a single-CPU system
     if [ -n "$1" ]; then
-      make "$1" GPROOT=/usr/local PARALLEL_MAKE_OPTS=-j4 -s dist
+      make "$1" GPROOT=/usr/local PARALLEL_MAKE_OPTS=-j4  dist
     else
-      make GPROOT=/usr/local PARALLEL_MAKE_OPTS=-j4 -s dist
+      make GPROOT=/usr/local PARALLEL_MAKE_OPTS=-j4  dist
     fi
   popd
 }
@@ -252,6 +252,7 @@ function _main() {
   export CONFIGURE_FLAGS=${CONFIGURE_FLAGS}
 
   build_gpdb "${BLD_TARGET_OPTION[@]}"
+  exit 1
   git_info
 
   if [ "${TARGET_OS}" != "win32" ] ; then
