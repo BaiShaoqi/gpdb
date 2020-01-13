@@ -74,6 +74,9 @@ JOBS_THAT_SHOULD_NOT_BLOCK_RELEASE = (
         'test_gpdb_clients_windows',
         'walrep_2',
         'Publish Server Builds',
+        'create_gpdb_rpm_installer_centos6',
+        'create_gpdb_rpm_installer_centos7',
+        'create_gpdb_deb_installer_ubuntu18.04',
     ] + RELEASE_VALIDATOR_JOB + JOBS_THAT_ARE_GATES
 )
 
