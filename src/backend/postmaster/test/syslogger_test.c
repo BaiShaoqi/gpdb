@@ -9,7 +9,7 @@
 #include "../syslogger.c"
 
 time_t
-time_mock(time_t *unused)
+time(time_t *unused)
 {
     return (time_t)mock();
 }
@@ -37,11 +37,11 @@ test__logfile_getname(void **state)
     char *alert_file_name;
 
     alert_file_pattern = "alert_log";
-    will_return(time_mock, 12345);
+    will_return(time, 12345);
 
 	log_timezone = pg_tzset("GMT");
 
-	alert_file_name = logfile_getname(time_mock(NULL), NULL, "gpperfmon/logs", "alert_log-%F");
+	alert_file_name = logfile_getname(time(NULL), NULL, "gpperfmon/logs", "alert_log-%F");
 	assert_true(strcmp(alert_file_name, "gpperfmon/logs/alert_log-1970-01-01") == 0);
 }
 
